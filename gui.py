@@ -419,29 +419,10 @@ class MainWindow(QMainWindow):
 
     def stop_capture(self):
 
-        """
-        The current backend does not yet expose a
-        stop mechanism for Scapy sniff().
-        
-        Therefore this function currently stops the
-        GUI from starting another capture, but the
-        running Scapy capture must be stopped by
-        closing the application or by adding a
-        backend stop_event later.
-        """
-
         if self.capture_worker is None:
             return
 
-        QMessageBox.information(
-            self,
-            "Capture Stop",
-            "The capture worker is running.\n\n"
-            "The backend currently does not expose "
-            "a Scapy stop event. A small backend "
-            "change is required for a fully functional "
-            "Stop Capture button."
-        )
+        self.capture_worker.stop()
 
     # ==================================================
     # PACKET RECEIVED

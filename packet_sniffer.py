@@ -22,15 +22,23 @@ def process_packet(packet, callback=None):
     return data
 
 
-def start_capture(callback=None):
+def start_capture(callback=None, stop_event=None):
 
     interface = get_wifi_interface()
 
-    sniff(
-        iface=interface,
-        prn=lambda packet: process_packet(packet, callback),
-        store=False
-    )
+    if stop_event is None:
+        sniff(
+            iface=interface,
+            prn=lambda packet: process_packet(packet, callback),
+            store=False
+        )
+    else:
+        sniff(
+            iface=interface,
+            prn=lambda packet: process_packet(packet, callback),
+            store=False,
+            stop_filter=lambda packet: stop_event.is_set()
+        )
 
 
 if __name__ == "__main__":

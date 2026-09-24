@@ -1,3 +1,5 @@
+import threading
+
 from PySide6.QtCore import QObject, Signal, Slot
 
 from packet_sniffer import start_capture
@@ -13,6 +15,10 @@ class CaptureWorker(QObject):
     capture_finished = Signal()
     capture_error = Signal(str)
 
+    def __init__(self):
+        super().__init__()
+        self.stop_event = threading.Event()
+
     @Slot()
     def start(self):
         """
@@ -22,9 +28,12 @@ class CaptureWorker(QObject):
         to the GUI through a Qt signal.
         """
 
+        self.stop_event.clear()
+
         try:
             start_capture(
-                callback=self.packet_received.emit
+                callback=self.packet_received.emit,
+                stop_event=self.stop_event
             )
 
         except Exception as error:
@@ -32,3 +41,11 @@ class CaptureWorker(QObject):
 
         finally:
             self.capture_finished.emit()
+
+    @Slot()
+    def stop(self):
+        """
+        Signal the Scapy capture to stop.
+        """
+
+        self.stop_event.set()
