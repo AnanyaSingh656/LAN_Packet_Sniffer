@@ -1,8 +1,15 @@
-from scapy.all import sniff
+from scapy.all import sniff, conf
 from packet_parser import parse_packet
 
 
-INTERFACE = r"\Device\NPF_{0DDED875-66AB-4375-9A33-FBA11C9086F6}"
+def get_wifi_interface():
+    for interface in conf.ifaces.values():
+        name = str(interface.name).lower()
+
+        if "wi-fi" in name or "wireless" in name or "wlan" in name:
+            return interface.name
+
+    raise RuntimeError("Wi-Fi interface not found")
 
 
 def process_packet(packet, callback=None):
@@ -17,8 +24,10 @@ def process_packet(packet, callback=None):
 
 def start_capture(callback=None):
 
+    interface = get_wifi_interface()
+
     sniff(
-        iface=INTERFACE,
+        iface=interface,
         prn=lambda packet: process_packet(packet, callback),
         store=False
     )
@@ -29,7 +38,6 @@ if __name__ == "__main__":
     print("==============================================")
     print("REAL-TIME LAN PACKET SNIFFER")
     print("==============================================")
-    print("Interface: Airtel Hotspot (Qualcomm Wi-Fi)")
     print("Press CTRL+C to stop.\n")
 
     start_capture()
