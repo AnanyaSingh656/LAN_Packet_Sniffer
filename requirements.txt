@@ -1,2 +1,6 @@
 PySide6
 scapy
+pandas
+scikit-learn
+joblib
+matplotlib
