@@ -1,5 +1,7 @@
-from scapy.all import Ether, IP, IPv6, TCP, UDP, DNS
+from scapy.all import Ether, IP, IPv6, TCP, UDP, DNS, DNSQR
+from application_identifier import ApplicationIdentifier
 
+app_identifier = ApplicationIdentifier()
 
 def identify_protocol(packet):
 
@@ -29,8 +31,22 @@ def identify_protocol(packet):
 
     return "OTHER"
 
+def get_dns_domain(packet):
+    if DNS in packet and DNSQR in packet:
+        try:
+            domain = packet[DNSQR].qname.decode("utf-8")
+            return domain.rstrip(".")
+        except:
+            return None
+
+    return None
+
+
 
 def parse_packet(packet):
+
+    app_identifier.process_dns_packet(packet)
+    app_identifier.process_tls_packet(packet)
 
     data = {
         "source_mac": None,
@@ -44,7 +60,9 @@ def parse_packet(packet):
         "destination_port": None,
         "protocol": identify_protocol(packet),
         "packet_length": len(packet),
-        "security_warning": None
+        "security_warning": None,
+        "domain": get_dns_domain(packet),
+        "application": None
     }
 
     # Data Link Layer
@@ -67,6 +85,22 @@ def parse_packet(packet):
         data["ip_version"] = "IPv6"
         data["source_ip"] = packet[IPv6].src
         data["destination_ip"] = packet[IPv6].dst
+
+    # Application / Domain identification
+
+    if data["destination_ip"]:
+        data["domain"] = (
+            data["domain"]
+            or app_identifier.get_domain(data["destination_ip"])
+        )
+
+    if data["source_ip"] and not data["domain"]:
+        data["domain"] = app_identifier.get_domain(data["source_ip"])
+
+    data["application"] = app_identifier.get_application(
+        data["domain"],
+        data["destination_ip"]
+    )  
 
     # TCP
     if TCP in packet:
