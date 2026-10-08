@@ -609,6 +609,7 @@ class MainWindow(QMainWindow):
         table_layout = QVBoxLayout()
 
         self.packet_table = QTableWidget()
+        self.packet_table.verticalHeader().setVisible(False)
 
         # The table gets enough space to show
         # multiple packets, but the whole dashboard
@@ -618,16 +619,18 @@ class MainWindow(QMainWindow):
         )
 
         columns = [
-            "No.",
-            "Time",
-            "Protocol",
-            "Source IP",
-            "Destination IP",
-            "Source Port",
-            "Destination Port",
-            "Length",
-            "Security",
-        ]
+    "No.",
+    "Time",
+    "Protocol",
+    "Source IP",
+    "Destination IP",
+    "Domain",
+    "Application",
+    "Source Port",
+    "Destination Port",
+    "Length",
+    "Security",
+]
 
         self.packet_table.setColumnCount(
             len(columns)
@@ -698,19 +701,21 @@ class MainWindow(QMainWindow):
         self.detail_labels = {}
 
         detail_fields = [
-            "Source MAC",
-            "Destination MAC",
-            "IP Version",
-            "Source IP",
-            "Destination IP",
-            "IP Header Length",
-            "Transport Protocol",
-            "Source Port",
-            "Destination Port",
-            "Protocol",
-            "Packet Length",
-            "Security Warning",
-        ]
+    "Source MAC",
+    "Destination MAC",
+    "IP Version",
+    "Source IP",
+    "Destination IP",
+    "Domain",
+    "Application",
+    "IP Header Length",
+    "Transport Protocol",
+    "Source Port",
+    "Destination Port",
+    "Protocol",
+    "Packet Length",
+    "Security Warning",
+]
 
         for field in detail_fields:
 
@@ -1148,54 +1153,36 @@ class MainWindow(QMainWindow):
         )
 
         values = [
-            str(
-                self.packet_count
-            ),
+    str(self.packet_count),
 
-            current_time,
+    current_time,
 
-            data.get(
-                "protocol"
-            )
-            or "-",
+    data.get("protocol") or "-",
 
-            data.get(
-                "source_ip"
-            )
-            or "-",
+    data.get("source_ip") or "-",
 
-            data.get(
-                "destination_ip"
-            )
-            or "-",
+    data.get("destination_ip") or "-",
 
-            str(
-                data.get(
-                    "source_port"
-                )
-                if data.get(
-                    "source_port"
-                ) is not None
-                else "-"
-            ),
+    data.get("domain") or "-",
 
-            str(
-                data.get(
-                    "destination_port"
-                )
-                if data.get(
-                    "destination_port"
-                ) is not None
-                else "-"
-            ),
+    data.get("application") or "Unknown",
 
-            str(
-                packet_length
-            ),
+    str(
+        data.get("source_port")
+        if data.get("source_port") is not None
+        else "-"
+    ),
 
-            security_warning
-            or "-",
-        ]
+    str(
+        data.get("destination_port")
+        if data.get("destination_port") is not None
+        else "-"
+    ),
+
+    str(packet_length),
+
+    security_warning or "-",
+]
 
         for column, value in enumerate(
             values
@@ -1658,43 +1645,23 @@ class MainWindow(QMainWindow):
             return
 
         field_mapping = {
+    "Source MAC": "source_mac",
+    "Destination MAC": "destination_mac",
+    "IP Version": "ip_version",
+    "Source IP": "source_ip",
+    "Destination IP": "destination_ip",
 
-            "Source MAC":
-                "source_mac",
+    "Domain": "domain",
+    "Application": "application",
 
-            "Destination MAC":
-                "destination_mac",
-
-            "IP Version":
-                "ip_version",
-
-            "Source IP":
-                "source_ip",
-
-            "Destination IP":
-                "destination_ip",
-
-            "IP Header Length":
-                "ip_header_length",
-
-            "Transport Protocol":
-                "transport",
-
-            "Source Port":
-                "source_port",
-
-            "Destination Port":
-                "destination_port",
-
-            "Protocol":
-                "protocol",
-
-            "Packet Length":
-                "packet_length",
-
-            "Security Warning":
-                "security_warning",
-        }
+    "IP Header Length": "ip_header_length",
+    "Transport Protocol": "transport",
+    "Source Port": "source_port",
+    "Destination Port": "destination_port",
+    "Protocol": "protocol",
+    "Packet Length": "packet_length",
+    "Security Warning": "security_warning",
+}
 
         for field, key in (
             field_mapping.items()
